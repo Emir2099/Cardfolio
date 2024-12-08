@@ -1,101 +1,105 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import PackSelection from '../components/PackSelection'
+import PackOpening from '../components/PackOpening'
+import CardStack from '../components/CardStack'
+import BackButton from '../components/BackButton'
+import PokemonLoader from '../components/PokemonLoader'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [selectedPack, setSelectedPack] = useState<number | null>(null)
+  const [isPackOpened, setIsPackOpened] = useState(false)
+  const [showCards, setShowCards] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const packs = [
+    { id: 1, name: 'SKILLS', color: '#FFD700', bgColor: '#1a1a1a' },
+    { id: 2, name: 'ABOUT', color: '#FFA500', bgColor: '#2a2a2a' },
+    { id: 3, name: 'PROJECTS', color: '#DAA520', bgColor: '#3a3a3a' },
+  ]
+
+  const handlePackSelect = (packId: number) => {
+    setSelectedPack(packId)
+  }
+
+  const handlePackOpen = () => {
+    setIsPackOpened(true)
+    setIsLoading(true)
+    setTimeout(() => {
+      setIsLoading(false)
+      setShowCards(true)
+    }, 2000)
+  }
+
+  const handleBack = () => {
+    if (showCards) {
+      setShowCards(false)
+      setIsPackOpened(false)
+    } else if (isPackOpened) {
+      setIsPackOpened(false)
+      setSelectedPack(null)
+    } else if (selectedPack !== null) {
+      setSelectedPack(null)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-black text-yellow-500">
+      {(selectedPack !== null || isPackOpened || showCards) && (
+        <BackButton onClick={handleBack} />
+      )}
+      <AnimatePresence mode="wait">
+        {!selectedPack && (
+          <motion.div
+            key="pack-selection"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            <PackSelection onSelectPack={handlePackSelect} packs={packs} />
+          </motion.div>
+        )}
+        {selectedPack && !isPackOpened && (
+          <motion.div
+            key="pack-opening"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.5 }}
+          >
+            <PackOpening 
+              pack={packs.find(p => p.id === selectedPack)!} 
+              onPackOpen={handlePackOpen} 
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </motion.div>
+        )}
+        {isLoading && (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+            <PokemonLoader />
+          </motion.div>
+        )}
+        {showCards && (
+          <motion.div
+            key="card-stack"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.5 }}
+          >
+            <CardStack packId={selectedPack!} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
+  )
 }
+
